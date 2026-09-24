@@ -12,7 +12,7 @@
 
   function defaults(){
     return {
-      founders:{names:'吳孟霖 × 簡子惠',intro:'一位老師與一位工程師，希望每個孩子的想法，都有機會被看見。',photo:null},
+      founders:{names:'樂寫公益學習網・吳孟霖 × 自然科老師・簡子惠',intro:'一位工程師 × 一位自然科老師，\n希望每個孩子的想法，都有機會被看見。',photo:null},
       sponsors:[{id:'mediatek',name:'聯發科技志工社',role:'核心支持夥伴',logo:null,builtin:BUILTIN,visible:true}]
     };
   }
@@ -87,6 +87,10 @@
       if(own(f,'names'))result.founders.names=attempt(()=>text(f.names,'共同發起人姓名',120,true),result.founders.names);
       if(own(f,'intro'))result.founders.intro=attempt(()=>text(f.intro,'共同發起人介紹',600,false),result.founders.intro);
       if(own(f,'photo'))result.founders.photo=attempt(()=>image(f.photo,'共同發起人照片'),null);
+      // Upgrade only the exact previous built-in copy; keep customized text and images.
+      if(f.names==='吳孟霖 × 簡子惠'&&f.intro==='一位老師與一位工程師，希望每個孩子的想法，都有機會被看見。'){
+        const updated=defaults().founders;result.founders.names=updated.names;result.founders.intro=updated.intro;
+      }
     }
     if(own(saved,'sponsors')&&Array.isArray(saved.sponsors)&&saved.sponsors.length<=12){
       const list=[],seen=new Set(),known=result.sponsors[0];

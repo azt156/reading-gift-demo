@@ -123,3 +123,65 @@ test('UMD 在瀏覽器環境公開 CampaignSettings',()=>{
   assert.equal(typeof sandbox.CampaignSettings.defaults,'function');
   assert.equal(sandbox.CampaignSettings.validate(sandbox.CampaignSettings.defaults()).title,'閱讀有禮');
 });
+
+test('挑戰辦法預設值完整，舊版沒有 rules 可驗證且不共用物件',()=>{
+  const d=C.defaults(),legacy=C.defaults();delete legacy.rules;
+  assert.equal(d.rules.reviewDays,5);
+  assert.equal(d.rules.giftSponsor,'台灣閱讀文化基金會');
+  assert.equal(d.rules.reviewChecks,'筆記是否足量、想法是否出自本人、說書能否聽出確實讀過本書。');
+  assert.equal(d.rules.fairness,'筆記、反思與說書內容須出自本人閱讀；如有抄襲、由 AI 代寫，或錄音並非本人所讀所講等情事，經查證屬實，取消本期參加資格。');
+  assert.deepEqual(C.validate(legacy).rules,d.rules);
+  const loaded=C.merge(legacy);loaded.rules.reviewDays=20;
+  assert.equal(C.defaults().rules.reviewDays,5);assert.equal(d.rules.reviewDays,5);
+});
+
+test('審核天數僅接受 1–60 整數，不強制轉型',()=>{
+  for(const reviewDays of [1,60])assert.equal(C.validate({...C.defaults(),rules:{...C.defaults().rules,reviewDays}}).rules.reviewDays,reviewDays);
+  for(const reviewDays of [0,61,-1,1.5,'5',null,true,NaN,Infinity,undefined]){
+    assert.throws(()=>C.validate({...C.defaults(),rules:{...C.defaults().rules,reviewDays}}),/審核天數/);
+  }
+});
+
+test('贊助單位允許留空，其餘規則必填，文字長度按 Unicode 字元計算',()=>{
+  for(const [key,max] of [['giftSponsor',100],['reviewChecks',500],['fairness',500]]){
+    for(const value of [null,4,{},[],'字'.repeat(max+1)])assert.throws(()=>C.validate({...C.defaults(),rules:{...C.defaults().rules,[key]:value}}));
+    assert.equal(Array.from(C.validate({...C.defaults(),rules:{...C.defaults().rules,[key]:'📖'.repeat(max)}}).rules[key]).length,max);
+    if(key!=='giftSponsor')assert.throws(()=>C.validate({...C.defaults(),rules:{...C.defaults().rules,[key]:' \n '}}));
+  }
+  assert.equal(C.validate({...C.defaults(),rules:{...C.defaults().rules,giftSponsor:' \n\u0000 '}}).rules.giftSponsor,'');
+});
+
+test('有提供 rules 就必須為完整物件，拒絕缺欄位及繼承欄位',()=>{
+  for(const rules of [null,undefined,[],5,'{}',{}])assert.throws(()=>C.validate({...C.defaults(),rules}));
+  for(const key of Object.keys(C.defaults().rules)){
+    const rules=C.defaults().rules;delete rules[key];assert.throws(()=>C.validate({...C.defaults(),rules}));
+  }
+  assert.throws(()=>C.validate({...C.defaults(),rules:Object.create(C.defaults().rules)}));
+});
+
+test('rules 僅裁剪已知文字欄位，不執行 HTML，也不改原輸入',()=>{
+  const input=C.defaults();input.rules.reviewChecks=' 第一行\r\n第二行\u0000 ';input.rules.giftSponsor='<img src=x onerror=alert(1)>';input.rules.extra='略過';
+  const before=structuredClone(input),result=C.validate(input);
+  assert.equal(result.rules.reviewChecks,'第一行\n第二行');
+  assert.equal(result.rules.giftSponsor,input.rules.giftSponsor);assert.equal(result.rules.extra,undefined);
+  assert.deepEqual(input,before);assert.notEqual(result.rules,input.rules);
+});
+
+test('merge 規則逐欄回退，合法兄弟值及刻意留空的贊助單位保留',()=>{
+  const input={rules:{reviewDays:0,giftSponsor:' ',reviewChecks:' 自訂審核 ',fairness:null}},before=structuredClone(input);
+  const result=C.merge(input),d=C.defaults();
+  assert.equal(result.rules.reviewDays,d.rules.reviewDays);assert.equal(result.rules.giftSponsor,'');
+  assert.equal(result.rules.reviewChecks,'自訂審核');assert.equal(result.rules.fairness,d.rules.fairness);
+  assert.deepEqual(C.validate(result),result);assert.deepEqual(input,before);
+  assert.equal(C.merge({rules:{reviewDays:60}}).rules.reviewDays,60);
+  for(const rules of [null,[],false,'text'])assert.deepEqual(C.merge({rules}).rules,d.rules);
+});
+
+test('merge 忽略 rules 繼承欄位與額外 key，不污染 prototype',()=>{
+  assert.deepEqual(C.merge(Object.create({rules:{reviewDays:50}})).rules,C.defaults().rules);
+  const rules=Object.create({reviewDays:50});rules.giftSponsor='自訂單位';
+  const result=C.merge({rules});assert.equal(result.rules.reviewDays,5);assert.equal(result.rules.giftSponsor,'自訂單位');
+  const malicious=JSON.parse('{"rules":{"__proto__":{"polluted":true},"reviewDays":3}}');
+  const merged=C.merge(malicious);assert.equal(merged.rules.reviewDays,3);assert.equal({}.polluted,undefined);
+  assert.deepEqual(Object.keys(merged.rules),Object.keys(C.defaults().rules));
+});

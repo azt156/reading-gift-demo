@@ -31,3 +31,41 @@ label:not(.checkbox),input:not([type=checkbox]),textarea,select{font-size:18px}.
 /* Requested homepage simplification. */
 .brand-message .eyebrow{font-size:22px;letter-spacing:.15em;line-height:1.6}
 @media(max-width:760px){.brand-message .eyebrow{font-size:20px}}
+
+/* Reading outcomes between the brand introduction and the campaign. */
+.reading-values{padding-block:18px 76px}
+.values-heading{display:flex;justify-content:space-between;align-items:flex-end;gap:36px;margin-bottom:32px}
+.values-heading h2{font-family:var(--serif);font-size:38px;line-height:1.5;letter-spacing:.02em;margin:0;color:var(--ink)}
+.values-heading>p{font-size:19px;line-height:1.85;max-width:540px;margin:0 0 6px}
+.values-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:32px;list-style:none;margin:0;padding:0}
+.values-grid>li{border-top:1px solid #b9cbd6;padding:25px 0 0;min-width:0}
+.value-number{font-size:17px;color:var(--blue)}
+.values-grid h3{font-family:var(--serif);font-size:27px;line-height:1.6;color:var(--ink);margin:20px 0 8px}
+.values-grid p{font-size:19px;line-height:1.85;margin:0;max-width:360px}
+.founder-story{background:transparent;padding-block:70px 78px;border-top:1px solid var(--line)}
+.story-grid{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.3fr);gap:60px;align-items:start}
+.story-heading .eyebrow{font-size:16px;margin:0 0 22px}
+.founder-story .story-heading h2{font-family:var(--serif);font-size:38px;line-height:1.5;margin:0;color:var(--ink)}
+.story-content .story-lead{font-family:var(--serif);font-size:27px;line-height:1.8;margin:0 0 24px;color:var(--ink);white-space:pre-line}
+.story-content .founder-identity{font-size:19px;line-height:1.9;color:var(--ink);font-weight:600;margin:0 0 8px;overflow-wrap:anywhere}
+.story-description{font-size:19px;line-height:1.9;margin:0}
+.founder-story .founder-image{margin-top:24px;min-height:0;aspect-ratio:auto;background:transparent;border:0;max-width:580px}
+.founder-story .founder-image[hidden]{display:none}
+.founder-story .founder-image img{display:block;position:static;width:100%;height:auto;max-height:460px;object-fit:contain;border-radius:12px}
+@media(max-width:1050px){.values-heading h2,.founder-story .story-heading h2{font-size:33px}.values-heading>p{font-size:18px;max-width:440px}.story-grid{gap:36px}.story-content .story-lead{font-size:24px}.values-grid{gap:24px}}
+@media(max-width:760px){.reading-values{padding-block:22px 48px}.values-heading{display:block;margin-bottom:26px}.values-heading h2,.founder-story .story-heading h2{font-size:29px;line-height:1.55}.values-heading>p{font-size:18px;margin-top:18px}.values-grid{grid-template-columns:1fr;gap:26px}.values-grid>li{padding-top:18px}.values-grid h3{font-size:24px;margin:10px 0 6px}.values-grid p{font-size:18px;max-width:none}.founder-story{padding-block:44px 50px}.story-grid{grid-template-columns:1fr;gap:28px}.story-heading .eyebrow{margin-bottom:14px}.story-content .story-lead{font-size:23px;line-height:1.85;margin-bottom:20px}.story-content .founder-identity,.story-description{font-size:18px}}
+
+/* Complete campaign rules, grouped into four readable sections. */
+.challenge-terms{margin-top:30px}.terms-preview-note{font-size:16px;line-height:1.8;color:var(--muted);margin:0 0 26px}
+.terms-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:34px 38px}
+.terms-section{min-width:0;border-top:1px solid var(--line);padding-top:24px}
+.terms-section h3{font-family:var(--serif);font-size:25px;line-height:1.5;color:var(--ink);border-left:3px solid var(--gold);padding-left:14px;margin:0 0 18px}
+.terms-section ul{padding-left:23px;margin:0}.terms-section li{font-size:18px;line-height:1.9;padding-left:2px;margin-bottom:10px}
+.gift-sponsor-card{border:1px solid var(--line);border-top:3px solid var(--blue);border-radius:0 0 12px 12px;padding:20px;background:var(--white,#fff)}
+.gift-sponsor-card h4{font-family:var(--serif);font-size:21px;line-height:1.65;margin:0 0 8px;color:var(--ink);overflow-wrap:anywhere}
+.gift-sponsor-card p{font-size:18px;line-height:1.8;margin:0 0 18px}
+#gift-sponsor-placeholder{border:1px dashed #b9ac8e;border-radius:6px;padding:22px 12px;text-align:center;font-size:16px;color:var(--muted);background:#f7f9fa}
+#gift-sponsor-logo{display:block;max-width:100%;max-height:100px;width:auto;height:auto;margin:15px auto;object-fit:contain;background:transparent}
+#gift-sponsor-logo[hidden],#gift-sponsor-placeholder[hidden]{display:none}
+.quota-full-note{font-size:18px;font-weight:600;color:var(--ink);padding:12px 16px;background:#fbf5e3;border-radius:8px}
+@media(max-width:760px){.terms-grid{grid-template-columns:1fr;gap:26px}.terms-section h3{font-size:24px}.terms-preview-note{font-size:16px}.gift-sponsor-card{padding:18px}.gift-sponsor-card h4{font-size:21px}}

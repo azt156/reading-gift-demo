@@ -15,6 +15,12 @@
       slogan:'讀一本好書，說一段自己的想法。',
       intro:'讀懂・寫下・說出來。完成閱讀挑戰，讓好書接力陪伴你。',
       startDate:'',endDate:'',gift:'好書一本',
+      rules:{
+        reviewDays:5,
+        giftSponsor:'台灣閱讀文化基金會',
+        reviewChecks:'筆記是否足量、想法是否出自本人、說書能否聽出確實讀過本書。',
+        fairness:'筆記、反思與說書內容須出自本人閱讀；如有抄襲、由 AI 代寫，或錄音並非本人所讀所講等情事，經查證屬實，取消本期參加資格。'
+      },
       steps:[
         {title:'讀一本書',description:'選一本想讀的好書，讀完後留下書名與作者。'},
         {title:'留下筆記',description:'依章節整理重點，標示出處，再用自己的話寫下理解。'},
@@ -29,10 +35,10 @@
     };
   }
 
-  function text(value,label,max){
+  function text(value,label,max,allowEmpty=false){
     if(typeof value!=='string')throw new Error(label+'請填寫文字。');
     const result=value.replace(/\r\n?/g,'\n').replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g,'').trim();
-    if(!result)throw new Error(label+'不可空白。');
+    if(!result&&!allowEmpty)throw new Error(label+'不可空白。');
     if(Array.from(result).length>max)throw new Error(label+'最多 '+max+' 個字。');
     return result;
   }
@@ -61,6 +67,23 @@
     return Array.from(values,(value,index)=>text(value,'第 '+(index+1)+' 條重要事項',limits.important));
   }
 
+  const ruleValidators={
+    reviewDays(value){
+      if(!Number.isInteger(value)||value<1||value>60)throw new Error('審核天數請填寫 1 至 60 的整數。');
+      return value;
+    },
+    giftSponsor:value=>text(value,'本期贊助單位',100,true),
+    reviewChecks:value=>text(value,'審核檢查項目',500),
+    fairness:value=>text(value,'公平規則',500)
+  };
+
+  function rules(input){
+    if(!record(input))throw new Error('挑戰辦法格式不正確。');
+    const result={};
+    for(const key of Object.keys(ruleValidators))result[key]=ruleValidators[key](own(input,key)?input[key]:undefined);
+    return result;
+  }
+
   function validate(input){
     if(!record(input))throw new Error('活動設定格式不正確。');
     const result={};
@@ -75,6 +98,7 @@
       };
     });
     result.important=important(input.important);
+    result.rules=own(input,'rules')?rules(input.rules):defaults().rules;
     return result;
   }
 
@@ -95,6 +119,11 @@
       }
     }
     if(own(saved,'important'))try{result.important=important(saved.important);}catch(_){}
+    if(own(saved,'rules')&&record(saved.rules)){
+      for(const key of Object.keys(ruleValidators)){
+        if(own(saved.rules,key))try{result.rules[key]=ruleValidators[key](saved.rules[key]);}catch(_){}
+      }
+    }
     return result;
   }
 

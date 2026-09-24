@@ -10,8 +10,8 @@ const partner=(id='test-partner')=>({id,name:'測試贊助單位',role:'',logo:n
 
 test('預設只有指定共同發起人與已知贊助單位',()=>{
   const d=C.defaults();
-  assert.equal(d.founders.names,'吳孟霖 × 簡子惠');
-  assert.equal(d.founders.intro,'一位老師與一位工程師，希望每個孩子的想法，都有機會被看見。');
+  assert.equal(d.founders.names,'樂寫公益學習網・吳孟霖 × 自然科老師・簡子惠');
+  assert.equal(d.founders.intro,'一位工程師 × 一位自然科老師，\n希望每個孩子的想法，都有機會被看見。');
   assert.equal(d.founders.photo,null);assert.equal(d.sponsors.length,1);
   assert.deepEqual(d.sponsors[0],{id:'mediatek',name:'聯發科技志工社',role:'核心支持夥伴',logo:null,builtin:'img/sponsor-mediatek.png',visible:true});
   assert.deepEqual(C.validate(d),d);
@@ -19,7 +19,7 @@ test('預設只有指定共同發起人與已知贊助單位',()=>{
 
 test('defaults、validate 不共用可變欄位，也不改輸入',()=>{
   const a=C.defaults(),b=C.defaults();a.founders.names='甲';a.sponsors[0].name='乙';
-  assert.equal(b.founders.names,'吳孟霖 × 簡子惠');assert.equal(b.sponsors[0].name,'聯發科技志工社');
+  assert.equal(b.founders.names,'樂寫公益學習網・吳孟霖 × 自然科老師・簡子惠');assert.equal(b.sponsors[0].name,'聯發科技志工社');
   const output=C.validate(a);output.sponsors[0].name='丙';assert.equal(a.sponsors[0].name,'乙');
 });
 
@@ -132,4 +132,21 @@ test('UMD 在瀏覽器環境公開 CommunitySettings 且能驗證 Blob',()=>{
   assert.equal(typeof sandbox.CommunitySettings.merge,'function');
   const input=sandbox.CommunitySettings.defaults();input.founders.photo=blob();
   assert.equal(sandbox.CommunitySettings.validate(input).founders.photo,input.founders.photo);
+});
+
+
+test('舊預設發起人文案更新角色配對，同時保留合照與自訂贊助',()=>{
+  const photo=blob(),saved={founders:{names:'吳孟霖 × 簡子惠',intro:'一位老師與一位工程師，希望每個孩子的想法，都有機會被看見。',photo},sponsors:[partner()]};
+  const result=C.merge(saved);
+  assert.equal(result.founders.names,C.defaults().founders.names);
+  assert.equal(result.founders.intro,C.defaults().founders.intro);
+  assert.equal(result.founders.photo,photo);
+  assert.deepEqual(result.sponsors,saved.sponsors);
+  assert.equal(saved.founders.names,'吳孟霖 × 簡子惠');
+});
+test('發起人文案升級不覆寫已自訂姓名或介紹',()=>{
+  for(const founders of [
+    {names:'我的自訂名稱',intro:'一位老師與一位工程師，希望每個孩子的想法，都有機會被看見。',photo:null},
+    {names:'吳孟霖 × 簡子惠',intro:'我的自訂介紹',photo:null}
+  ])assert.deepEqual(C.merge({founders}).founders,founders);
 });

@@ -26,7 +26,7 @@ window.addEventListener('pagehide',()=>communityUrls.forEach(url=>URL.revokeObje
 function renderCommunity(saved){
  const value=U.merge(saved);communityUrls.forEach(url=>URL.revokeObjectURL(url));communityUrls=[];
  $('#founder-names').textContent=value.founders.names;$('#founder-intro').textContent=value.founders.intro;
- const photo=$('#founder-photo');photo.hidden=!value.founders.photo;$('#founder-placeholder').hidden=!!value.founders.photo;
+ const photo=$('#founder-photo');photo.hidden=!value.founders.photo;photo.closest('.founder-image').hidden=!value.founders.photo;$('#founder-placeholder').hidden=true;
  if(value.founders.photo)photo.src=communityImage(value.founders.photo);else photo.removeAttribute('src');
  const visible=value.sponsors.filter(x=>x.visible);
  
@@ -36,7 +36,7 @@ function renderCommunity(saved){
 async function setupCommunity(){
  const s=await state();let draft=U.merge(s.community),photoBusy=0;
  const panel=document.createElement('section');panel.className='panel settings-panel';panel.innerHTML=`<h2>共同發起人與贊助單位</h2><p>合照顯示在共同發起人區，贊助單位與 Logo 顯示在頁尾。</p><form id="community-form" class="settings-form" inert onsubmit="return false">
- <fieldset><legend>共同發起人</legend><label for="founder-setting-names">姓名</label><input id="founder-setting-names" maxlength="120" required><label for="founder-setting-intro">一句話介紹</label><textarea id="founder-setting-intro" maxlength="600" rows="3"></textarea><label for="founder-setting-photo">共同發起人合照</label><input id="founder-setting-photo" type="file" accept="image/png,image/jpeg,image/webp"><p class="field-help">PNG、JPG 或 WebP，5 MB 以內。尚未提供照片時，首頁保留合照位置。</p><img id="founder-setting-preview" class="upload-preview" alt="已選擇的共同發起人合照" hidden></fieldset>
+ <fieldset><legend>共同發起人</legend><label for="founder-setting-names">姓名</label><input id="founder-setting-names" maxlength="120" required><label for="founder-setting-intro">一句話介紹</label><textarea id="founder-setting-intro" maxlength="600" rows="3"></textarea><label for="founder-setting-photo">共同發起人合照</label><input id="founder-setting-photo" type="file" accept="image/png,image/jpeg,image/webp"><p class="field-help">PNG、JPG 或 WebP，5 MB 以內。上傳後顯示於共同發起人區；未提供時不顯示空白照片框。</p><img id="founder-setting-preview" class="upload-preview" alt="已選擇的共同發起人合照" hidden></fieldset>
  <fieldset><legend>贊助單位</legend><div id="sponsor-setting-list"></div><button type="button" class="btn secondary" id="add-sponsor">＋ 新增贊助單位</button><p class="field-help">空白且未上傳 Logo 的新列不會保存。</p></fieldset>
  <div id="community-error" class="error-box" role="alert" hidden></div><div class="form-actions"><button type="submit" class="btn primary" id="save-community">儲存發起人與贊助單位</button><span id="community-status" class="settings-status" role="status"></span></div></form>`;
  $('.admin-workspace').insertBefore(panel,$('#admin-summary'));
@@ -67,7 +67,19 @@ async function renderCampaign(){
  $('#campaign-steps').innerHTML=c.steps.map((x,i)=>`<li><b>0${i+1}</b><h4>${esc(x.title)}</h4><p>${esc(x.description)}</p></li>`).join('');
  if($('#campaign-important'))$('#campaign-important').innerHTML=c.important.map(x=>`<li>${esc(x)}</li>`).join('');
  $('#campaign-capacity').textContent=s.capacity;
+ const rules=c.rules;
+ $('#rule-review-days').textContent=rules.reviewDays;
+ $('#rule-review-checks').textContent=rules.reviewChecks;
+ $('#rule-fairness').textContent=rules.fairness;
+ $('#rule-gift-summary').textContent=rules.giftSponsor?`本期提供 ${s.capacity} 本好書，由${rules.giftSponsor}贊助。`:`本期提供 ${s.capacity} 本好書，贊助單位待公告。`;
+ $('#gift-sponsor-title').textContent=rules.giftSponsor?rules.giftSponsor+' × '+c.title:'本期贊助單位待公告';
+ $('#gift-sponsor-description').textContent=rules.giftSponsor?`本期 ${s.capacity} 本好書由${rules.giftSponsor}贊助。`:'確認後將在這裡公布。';
+ const giftPartner=U.merge(s.community).sponsors.find(x=>x.visible&&x.name===rules.giftSponsor);
+ const giftLogo=$('#gift-sponsor-logo'),hasGiftLogo=!!(giftPartner?.logo||giftPartner?.builtin);
+ giftLogo.hidden=!hasGiftLogo;$('#gift-sponsor-placeholder').hidden=hasGiftLogo||!rules.giftSponsor;
+ if(hasGiftLogo){giftLogo.src=giftPartner.logo?communityImage(giftPartner.logo):giftPartner.builtin;giftLogo.alt=rules.giftSponsor+'標誌';}else giftLogo.removeAttribute('src');
  const remaining=D.remainingBooks(s);
+ $('#rules-stock-status').hidden=remaining>0;
  $$('[data-book-remaining]').forEach(el=>el.textContent=remaining);
  $$('[data-stock-message]').forEach(el=>el.textContent=remaining?'依通過順序保留名額，通過一位就少一本。':'本期贈書已額滿，通過後依序候補。');
 }
@@ -85,17 +97,21 @@ if($('#admin-records')){
  <div class="settings-grid"><div><label for="setting-startDate">活動開始日期</label><input type="date" id="setting-startDate"></div><div><label for="setting-endDate">活動結束日期</label><input type="date" id="setting-endDate"></div></div><p class="field-help">兩個日期都留空時，首頁顯示「日期確認後公告」。日期僅供活動展示，預覽練習仍可使用。</p>
  <div class="settings-grid"><div><label for="setting-gift">本期禮物</label><input id="setting-gift" maxlength="80" required></div><div><label for="gift-capacity">本期示範名額</label><input id="gift-capacity" type="number" min="1" max="100000" required></div></div>
  <fieldset><legend>如何完成</legend>${[0,1,2,3].map(i=>`<div class="step-setting"><div><label for="setting-step-title-${i}">步驟 ${i+1} 名稱</label><input id="setting-step-title-${i}" maxlength="40" required></div><div><label for="setting-step-description-${i}">步驟 ${i+1} 說明</label><input id="setting-step-description-${i}" maxlength="300" required></div></div>`).join('')}</fieldset>
- <fieldset><legend>重要事項</legend><label for="setting-important">每一行顯示一項（最多六項）</label><textarea id="setting-important" rows="5" required></textarea></fieldset>
+ <fieldset><legend>審核、贈書與公平規則</legend><div class="settings-grid"><div><label for="setting-review-days">審核工作天數</label><input id="setting-review-days" type="number" min="1" max="60" required></div><div><label for="setting-gift-sponsor">本期贈書贊助單位</label><input id="setting-gift-sponsor" maxlength="100" placeholder="留空時顯示待公告"></div></div><label for="setting-review-checks">審核重點</label><textarea id="setting-review-checks" maxlength="500" rows="3" required></textarea><label for="setting-fairness">公平規則</label><textarea id="setting-fairness" maxlength="500" rows="4" required></textarea><p class="field-help">如需顯示贊助 Logo，請在下方「贊助單位」新增相同名稱並上傳圖片。本 Demo 不會真的寄信、自動轉寫或寄書。</p></fieldset>
+ <fieldset hidden><legend>重要事項</legend><label for="setting-important">每一行顯示一項（最多六項）</label><textarea id="setting-important" rows="5" required></textarea></fieldset>
  <div id="settings-error" class="error-box" role="alert" hidden></div><div class="form-actions"><button type="submit" class="btn primary">儲存設定</button><a class="text-link" href="index.html" target="_blank" rel="noopener">查看首頁 ↗</a><span id="settings-status" class="settings-status" role="status"></span></div></form>`;
  $('.admin-workspace').insertBefore(container,$('#admin-summary'));
  const initial=await state(),c=C.merge(initial.campaign),form=$('#campaign-settings-form');
  for(const key of ['title','slogan','intro','startDate','endDate','gift'])$('#setting-'+key).value=c[key];
  c.steps.forEach((x,i)=>{for(const key of ['title','description'])$('#setting-step-'+key+'-'+i).value=x[key];});
  $('#setting-important').value=c.important.join('\n');$('#gift-capacity').value=initial.capacity;
+ $('#setting-review-days').value=c.rules.reviewDays;$('#setting-gift-sponsor').value=c.rules.giftSponsor;
+ $('#setting-review-checks').value=c.rules.reviewChecks;$('#setting-fairness').value=c.rules.fairness;
  form.addEventListener('input',()=>{$('#settings-status').textContent='尚未儲存';$('#settings-error').hidden=true;});
  form.addEventListener('submit',async e=>{e.preventDefault();const err=$('#settings-error'),button=$('button[type=submit]',form);err.hidden=true;button.disabled=true;try{
  const raw=Object.fromEntries(['title','slogan','intro','startDate','endDate','gift'].map(key=>[key,$('#setting-'+key).value]));
  raw.steps=[0,1,2,3].map(i=>({title:$('#setting-step-title-'+i).value,description:$('#setting-step-description-'+i).value}));raw.important=$('#setting-important').value.split('\n').filter(x=>x.trim());
+ raw.rules={reviewDays:Number($('#setting-review-days').value),giftSponsor:$('#setting-gift-sponsor').value,reviewChecks:$('#setting-review-checks').value,fairness:$('#setting-fairness').value};
  const values=C.validate(raw);await mutate(s=>{D.changeCapacity(s,$('#gift-capacity').value);s.campaign=values;});
  notifySettings();await renderAdmin();$('#settings-status').textContent='已儲存，首頁已更新。';toast('活動設定已儲存。');
  }catch(e){err.hidden=false;err.textContent=e.message;$('#settings-status').textContent='尚未儲存';}finally{button.disabled=false;}});form.inert=false;
@@ -149,7 +165,7 @@ if($('#reading-form')){
  $('#record-stop').addEventListener('click',()=>{if(recorder?.state==='recording')recorder.stop();});window.addEventListener('pagehide',()=>{if(recorder?.state==='recording')recorder.stop();stopTracks();});
  function lockForm(){locked=Boolean(record&&record.status!=='revision');$$('#reading-form input,#reading-form textarea,#reading-form button').forEach(el=>el.disabled=locked);$('#record-stop').disabled=true;if(mediaBusy){$('#record-start').disabled=true;$('#audio-upload').disabled=true;$('#submit-reading').disabled=true;$('#record-stop').disabled=recorder?.state!=='recording';}else if(!locked)$('#record-start').disabled=false;}
  async function renderStatus(){s=await state();record=s.records.find(r=>r.readerId===reader.id);lockForm();$('#claim-section').hidden=true;const box=$('#status-content');$('#submission-status').hidden=!record;$('#reading-form').hidden=locked;$('.workspace-sidebar').hidden=locked;if(locked)$('#reader-greeting').textContent='作品已送出，處理進度都在這裡。';if(!record){box.innerHTML='<span class="tag">尚在草稿</span><p>完成四個步驟再送出，之後可以在這裡查看判定結果與回饋。</p>';return;}
- let desc={pending:'作品已保存在此瀏覽器。正式流程會先確認網站與雲端硬碟雙份保存，再交由 Gem 規則判定。此預覽尚未連接外部服務，可在管理者預覽中測試人工覆核。',revision:'請依下方回饋補充內容，完成後可再次送出。',approved:record.award==='reserved'?'已保留一份預覽名額，可以填寫測試用領取資料。':'本期預覽名額已滿，依通過順序列為候補；目前尚未取得領書資格。',claimed:'領取資料已保存在此瀏覽器。此操作只供流程確認，尚未安排寄送。'}[record.status];
+ let desc={pending:'作品已保存在此瀏覽器。正式流程會先確認網站與雲端硬碟雙份保存，再交由 Gem 協助判讀，最後由人工審核。此預覽尚未連接外部服務，可在管理者預覽中測試人工覆核。',revision:'請依下方回饋補充內容，完成後可再次送出。',approved:record.award==='reserved'?'已保留一份預覽名額，可以填寫測試用領取資料。':'本期預覽名額已滿，依通過順序列為候補；目前尚未取得領書資格。',claimed:'領取資料已保存在此瀏覽器。此操作只供流程確認，尚未安排寄送。'}[record.status];
  box.innerHTML=`<div class="status-line"><span class="tag ${record.status==='revision'?'warn':['approved','claimed'].includes(record.status)?'good':''}">${statusText[record.status]}</span><span class="field-help">作品編號 ${esc(record.id.slice(0,8))} · ${fmt(record.submittedAt)}</span></div><p>${desc}</p>${pipeline(record)}${record.passOrder?`<p class="rank-label">通過序號 ${record.passOrder} <span class="tag ${record.award==='reserved'?'good':'warn'}">${record.award==='reserved'?'已保留名額':'候補 '+Math.max(1,record.passOrder-s.capacity)}</span></p><p class="field-help">依首次通過時間排序；示範總名額 ${s.capacity} 份。</p>`:''}${record.feedback?`<div class="feedback"><strong>管理者回饋</strong><br>${esc(record.feedback)}</div>`:''}<details><summary class="field-help">查看處理紀錄</summary><ol class="history">${record.history.map(h=>`<li>${fmt(h.at)} · ${esc(h.text)}</li>`).join('')}</ol></details>`;
  if(record.status==='revision'){const b=document.createElement('button');b.type='button';b.className='btn secondary';b.textContent='回到作品補充';b.addEventListener('click',()=>{showStep(1,true);});box.appendChild(b);}
  if(record.status==='approved'&&record.award==='reserved')$('#claim-section').hidden=false;
