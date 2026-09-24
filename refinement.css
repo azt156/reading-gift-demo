@@ -108,3 +108,15 @@ label:not(.checkbox),input:not([type=checkbox]),textarea,select{font-size:18px}.
 @media(max-width:760px){.rules-document{padding-block:28px 40px}.rules-page-heading h1{font-size:34px}.rules-page-heading>p{font-size:18px}.rules-document .full-rules{padding-inline:18px}.rules-page-actions .btn{width:100%;justify-content:center}.service-footer .footer-bottom{grid-template-columns:1fr;gap:22px;padding-block:28px}.service-footer{padding-bottom:65px}.footer-brand{font-size:16px}.service-footer h2{margin-bottom:8px}}
 
 .review-art img[hidden]{display:none}.review-art.image-unavailable .review-symbol{position:static;width:110px;height:110px;padding:17px}@media(max-width:760px){.review-art.image-unavailable .review-symbol{width:86px;height:86px;padding:13px}}
+
+/* Keep the note in the blue palette and show the full site name only in the header. */
+.reading-purpose{background:#f1f5f7;border-left:3px solid #b9cbd6}
+.site-header .brand{font-family:var(--sans);font-size:23px;letter-spacing:0;font-weight:750;min-width:0}
+.brand-title{line-height:1.5}.brand-event{white-space:nowrap}
+.service-footer .footer-brand-block{padding-top:5px}.service-footer .footer-brand-block .sponsor{min-height:44px}
+@media(max-width:1050px) and (min-width:761px){.site-header .brand{font-size:19px;gap:8px}#main-nav{gap:16px}#main-nav a{font-size:16px}}
+@media(max-width:760px){.site-header .brand{font-size:18px;gap:8px;white-space:normal}.brand-title{display:block}.brand-event{display:block;font-size:16px}.site-header .brand img{width:31px;height:43px}}
+
+/* Matching capsule buttons for rules-page navigation. */
+.rules-page-actions .btn,.rules-page-heading .rules-back{width:270px;min-width:0;min-height:64px;box-sizing:border-box;justify-content:center;gap:12px;padding:14px 22px;font-family:var(--sans);font-size:19px;font-weight:700;line-height:1.6;text-decoration:none;border-radius:999px}
+@media(max-width:760px){.rules-page-actions .btn{width:100%}.rules-page-heading .rules-back{width:min(270px,100%)}}
