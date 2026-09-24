@@ -85,3 +85,19 @@ label:not(.checkbox),input:not([type=checkbox]),textarea,select{font-size:18px}.
 /* Origin: photo on the left, a short founder introduction on the right. */
 .founder-origin{background:transparent;border-top:1px solid var(--line);padding-block:55px 65px}.founder-origin h2{font-family:var(--serif);font-size:34px}.founder-origin .founder-card{background:#fff;align-items:center;gap:30px;border-radius:16px}.founder-origin .founder-image{aspect-ratio:13/9;position:relative;border-radius:8px;min-width:0}.founder-origin .founder-image img{object-fit:contain}.founder-origin #founder-photo[hidden],.founder-origin #founder-placeholder[hidden]{display:none}.founder-origin #founder-placeholder{font-size:18px}.founder-origin .founder-copy{min-width:0}.founder-origin .founder-copy h3{font-family:var(--serif);font-size:27px;line-height:1.6;margin:0 0 20px}.founder-origin .founder-copy p{max-width:none;font-size:18px;line-height:1.9}.founder-origin .story-lead{font-size:22px!important;margin:0 0 20px;color:var(--ink)}.founder-origin .founder-identity{font-weight:650;margin-bottom:12px;color:var(--ink)}.founder-origin .story-description{margin:0}
 @media(max-width:760px){.founder-origin .founder-card{grid-template-columns:1fr;padding:18px;gap:24px}.founder-origin h2{font-size:29px}.founder-origin .founder-copy h3{font-size:25px}.founder-origin .story-lead{font-size:21px!important}.founder-origin #founder-placeholder{font-size:17px}}
+
+/* Semantic vector badges supplement the original transparent Leya artwork. */
+.review-art{position:relative;width:210px;max-width:100%;margin-inline:auto}.review-art .review-symbol{position:absolute;right:0;bottom:0;width:66px;height:66px;padding:9px;box-sizing:border-box;border-radius:50%;background:#fff9e9;color:var(--ink);border:1px solid #ecd69c}.review-art img{max-width:100%}
+@media(max-width:760px){.review-art{width:96px}.review-art .review-symbol{width:46px;height:46px;padding:5px;right:-6px;bottom:1px}}
+
+/* Navigation uses the same gold highlight as the main heading. */
+#main-nav a{position:relative;isolation:isolate;transition:color .18s ease,background-color .18s ease}
+#main-nav a::after{content:"";display:block;position:absolute;left:-3px;right:-3px;bottom:1px;width:auto;height:7px;margin:0;border-radius:1px;background:var(--gold);opacity:0;transform:scaleX(.3) rotate(-1deg);transform-origin:left;transition:transform .18s ease,opacity .18s ease;z-index:-1;pointer-events:none}
+#main-nav a:is(:hover,:focus-visible){color:var(--blue)}
+#main-nav a:is(:hover,:focus-visible)::after,#main-nav a[aria-current]:not(.nav-cta)::after{display:block;width:auto;height:7px;margin:0;opacity:.65;transform:scaleX(1) rotate(-1deg)}
+#main-nav a:focus-visible{outline:2px solid var(--blue);outline-offset:6px;border-radius:3px}
+#main-nav .nav-cta:is(:hover,:focus-visible){color:#fff;background:var(--blue)}
+#main-nav .nav-cta::after{left:22px;right:22px;bottom:10px;height:4px;z-index:0}
+#main-nav .nav-cta:is(:hover,:focus-visible)::after{height:4px;opacity:1}
+@media(max-width:760px){#main-nav a:not(.nav-cta)::after{left:10px;right:10px;bottom:8px}}
+@media(prefers-reduced-motion:reduce){#main-nav a,#main-nav a::after{transition:none}}
