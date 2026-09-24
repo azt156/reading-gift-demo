@@ -8,6 +8,12 @@ function toast(t){const el=$('#toast');el.textContent=t;el.classList.add('show')
 const menu=$('.menu-toggle');menu?.addEventListener('click',()=>{const open=menu.getAttribute('aria-expanded')!=='true';menu.setAttribute('aria-expanded',String(open));menu.setAttribute('aria-label',open?'關閉選單':'開啟選單');$('#main-nav').classList.toggle('open',open);});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&menu){menu.setAttribute('aria-expanded','false');menu.setAttribute('aria-label','開啟選單');$('#main-nav').classList.remove('open');}});
 $$('#main-nav a').forEach(a=>a.addEventListener('click',()=>{menu?.setAttribute('aria-expanded','false');$('#main-nav').classList.remove('open');}));
+// Keep the inline semantic icon readable even if a mascot request fails.
+$$('.review-art img').forEach(img=>{
+ const fallback=()=>{img.hidden=true;img.closest('.review-art').classList.add('image-unavailable');};
+ img.addEventListener('error',fallback,{once:true});
+ if(img.complete&&!img.naturalWidth)fallback();
+});
 if(!$('#reading-form')&&!$('#admin-records')&&!$('#access-form')&&!$('[data-campaign]'))return;
 const D=window.ReadingDomain;
 function storageFailure(e){const box=$('#storage-error');const message='瀏覽器無法保存資料，請確認儲存空間或改用一般瀏覽模式；目前內容未成功保存。';if(box){box.hidden=false;box.textContent=message;}toast(message);console.warn('Local storage operation failed:',e?.name||'unknown');}
@@ -25,9 +31,9 @@ function communityImage(blob){const url=URL.createObjectURL(blob);communityUrls.
 window.addEventListener('pagehide',()=>communityUrls.forEach(url=>URL.revokeObjectURL(url)));
 function renderCommunity(saved){
  const value=U.merge(saved);communityUrls.forEach(url=>URL.revokeObjectURL(url));communityUrls=[];
- $('#founder-names').textContent=value.founders.names;$('#founder-intro').textContent=value.founders.intro;
+ if($('#founder-names')){ $('#founder-names').textContent=value.founders.names;$('#founder-intro').textContent=value.founders.intro;
  const photo=$('#founder-photo');photo.hidden=!value.founders.photo;photo.closest('.founder-image').hidden=false;$('#founder-placeholder').hidden=!!value.founders.photo;
- if(value.founders.photo)photo.src=communityImage(value.founders.photo);else photo.removeAttribute('src');
+ if(value.founders.photo)photo.src=communityImage(value.founders.photo);else photo.removeAttribute('src'); }
  const visible=value.sponsors.filter(x=>x.visible);
  
 
@@ -58,29 +64,33 @@ async function setupCommunity(){
 async function renderCampaign(){
  const s=await state(),c=C.merge(s.campaign);
  renderCommunity(s.community);
- for(const key of ['title','slogan','intro','gift']){const el=$('#campaign-'+key);if(el)el.textContent=c[key];}
- $('#campaign-title').classList.toggle('custom-title',c.title!=='閱讀有禮');
- if(c.title==='閱讀有禮')$('#campaign-title').innerHTML='閱讀<span class="gold-text">有禮</span><span class="title-star" aria-hidden="true">✦</span>';
- $('#campaign-intro').innerHTML=esc(c.intro).replace('。','。<br>');
- $('#campaign-slogan').innerHTML=c.slogan.split('，').map(x=>'<span class="slogan-phrase">'+esc(x)+'</span>').join('，<wbr>');
- $('#campaign-period').textContent=c.startDate?c.startDate.replaceAll('-',' / ')+' — '+c.endDate.replaceAll('-',' / '):'日期確認後公告';
- $('#campaign-steps').innerHTML=c.steps.map((x,i)=>`<li><b>0${i+1}</b><h4>${esc(x.title)}</h4><p>${esc(x.description)}</p></li>`).join('');
- if($('#campaign-important'))$('#campaign-important').innerHTML=c.important.map(x=>`<li>${esc(x)}</li>`).join('');
- $('#campaign-capacity').textContent=s.capacity;
+ const put=(id,value)=>{const el=$('#'+id);if(el)el.textContent=value;};
+ if($('#campaign-title')){
+  for(const key of ['title','slogan','intro','gift'])put('campaign-'+key,c[key]);
+  $('#campaign-title').classList.toggle('custom-title',c.title!=='閱讀有禮');
+  if(c.title==='閱讀有禮')$('#campaign-title').innerHTML='閱讀<span class="gold-text">有禮</span><span class="title-star" aria-hidden="true">✦</span>';
+  $('#campaign-intro').innerHTML=esc(c.intro).replace('。','。<br>');
+  $('#campaign-slogan').innerHTML=c.slogan.split('，').map(x=>'<span class="slogan-phrase">'+esc(x)+'</span>').join('，<wbr>');
+  put('campaign-period',c.startDate?c.startDate.replaceAll('-',' / ')+' — '+c.endDate.replaceAll('-',' / '):'日期確認後公告');
+  $('#campaign-steps').innerHTML=c.steps.map((x,i)=>`<li><b>0${i+1}</b><h4>${esc(x.title)}</h4><p>${esc(x.description)}</p></li>`).join('');
+  if($('#campaign-important'))$('#campaign-important').innerHTML=c.important.map(x=>`<li>${esc(x)}</li>`).join('');
+ }
+ put('campaign-capacity',s.capacity);
  const rules=c.rules;
- $('#rule-review-days').textContent=rules.reviewDays;
- $('#review-days-summary').textContent=rules.reviewDays;
- $('#rule-review-checks').textContent=rules.reviewChecks;
- $('#rule-fairness').textContent=rules.fairness;
- $('#rule-gift-summary').textContent=rules.giftSponsor?`本期提供 ${s.capacity} 本好書，由${rules.giftSponsor}贊助。`:`本期提供 ${s.capacity} 本好書，贊助單位待公告。`;
- $('#gift-sponsor-title').textContent=rules.giftSponsor?rules.giftSponsor:'本期贊助單位待公告';
- $('#gift-sponsor-description').textContent=rules.giftSponsor?`本期 ${s.capacity} 本好書由${rules.giftSponsor}贊助。`:'確認後將在這裡公布。';
- const giftPartner=U.merge(s.community).sponsors.find(x=>x.visible&&x.name===rules.giftSponsor);
- const giftLogo=$('#gift-sponsor-logo'),hasGiftLogo=!!(giftPartner?.logo||giftPartner?.builtin);
- giftLogo.hidden=!hasGiftLogo;$('#gift-sponsor-placeholder').hidden=true;
- if(hasGiftLogo){giftLogo.src=giftPartner.logo?communityImage(giftPartner.logo):giftPartner.builtin;giftLogo.alt=rules.giftSponsor+'標誌';}else giftLogo.removeAttribute('src');
+ put('rule-review-days',rules.reviewDays);put('review-days-summary',rules.reviewDays);
+ put('rule-review-checks',rules.reviewChecks);put('rule-fairness',rules.fairness);
+ put('rule-gift-summary',rules.giftSponsor?`本期提供 ${s.capacity} 本好書，由${rules.giftSponsor}贊助。`:`本期提供 ${s.capacity} 本好書，贊助單位待公告。`);
+ put('gift-sponsor-title',rules.giftSponsor||'本期贊助單位待公告');
+ put('gift-sponsor-description',rules.giftSponsor?`提供本期 ${s.capacity} 本好書。`:'確認後將在這裡公布。');
+ const giftLogo=$('#gift-sponsor-logo');
+ if(giftLogo){
+  const giftPartner=U.merge(s.community).sponsors.find(x=>x.visible&&x.name===rules.giftSponsor);
+  const hasGiftLogo=!!(giftPartner?.logo||giftPartner?.builtin);
+  giftLogo.hidden=!hasGiftLogo;$('#gift-sponsor-placeholder').hidden=true;
+  if(hasGiftLogo){giftLogo.src=giftPartner.logo?communityImage(giftPartner.logo):giftPartner.builtin;giftLogo.alt=rules.giftSponsor+'標誌';}else giftLogo.removeAttribute('src');
+ }
  const remaining=D.remainingBooks(s);
- $('#rules-stock-status').hidden=remaining>0;
+ if($('#rules-stock-status'))$('#rules-stock-status').hidden=remaining>0;
  $$('[data-book-remaining]').forEach(el=>el.textContent=remaining);
  $$('[data-stock-message]').forEach(el=>el.textContent=remaining?'依通過順序保留名額，通過一位就少一本。':'本期贈書已額滿，通過後依序候補。');
 }
