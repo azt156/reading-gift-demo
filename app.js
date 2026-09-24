@@ -26,7 +26,7 @@ window.addEventListener('pagehide',()=>communityUrls.forEach(url=>URL.revokeObje
 function renderCommunity(saved){
  const value=U.merge(saved);communityUrls.forEach(url=>URL.revokeObjectURL(url));communityUrls=[];
  $('#founder-names').textContent=value.founders.names;$('#founder-intro').textContent=value.founders.intro;
- const photo=$('#founder-photo');photo.hidden=!value.founders.photo;photo.closest('.founder-image').hidden=!value.founders.photo;$('#founder-placeholder').hidden=true;
+ const photo=$('#founder-photo');photo.hidden=!value.founders.photo;photo.closest('.founder-image').hidden=false;$('#founder-placeholder').hidden=!!value.founders.photo;
  if(value.founders.photo)photo.src=communityImage(value.founders.photo);else photo.removeAttribute('src');
  const visible=value.sponsors.filter(x=>x.visible);
  
@@ -36,7 +36,7 @@ function renderCommunity(saved){
 async function setupCommunity(){
  const s=await state();let draft=U.merge(s.community),photoBusy=0;
  const panel=document.createElement('section');panel.className='panel settings-panel';panel.innerHTML=`<h2>共同發起人與贊助單位</h2><p>合照顯示在共同發起人區，贊助單位與 Logo 顯示在頁尾。</p><form id="community-form" class="settings-form" inert onsubmit="return false">
- <fieldset><legend>共同發起人</legend><label for="founder-setting-names">姓名</label><input id="founder-setting-names" maxlength="120" required><label for="founder-setting-intro">一句話介紹</label><textarea id="founder-setting-intro" maxlength="600" rows="3"></textarea><label for="founder-setting-photo">共同發起人合照</label><input id="founder-setting-photo" type="file" accept="image/png,image/jpeg,image/webp"><p class="field-help">PNG、JPG 或 WebP，5 MB 以內。上傳後顯示於共同發起人區；未提供時不顯示空白照片框。</p><img id="founder-setting-preview" class="upload-preview" alt="已選擇的共同發起人合照" hidden></fieldset>
+ <fieldset><legend>共同發起人</legend><label for="founder-setting-names">姓名</label><input id="founder-setting-names" maxlength="120" required><label for="founder-setting-intro">一句話介紹</label><textarea id="founder-setting-intro" maxlength="600" rows="3"></textarea><label for="founder-setting-photo">共同發起人合照</label><input id="founder-setting-photo" type="file" accept="image/png,image/jpeg,image/webp"><p class="field-help">PNG、JPG 或 WebP，5 MB 以內。上傳後顯示於共同發起人區；未提供時保留合照框。</p><img id="founder-setting-preview" class="upload-preview" alt="已選擇的共同發起人合照" hidden></fieldset>
  <fieldset><legend>贊助單位</legend><div id="sponsor-setting-list"></div><button type="button" class="btn secondary" id="add-sponsor">＋ 新增贊助單位</button><p class="field-help">空白且未上傳 Logo 的新列不會保存。</p></fieldset>
  <div id="community-error" class="error-box" role="alert" hidden></div><div class="form-actions"><button type="submit" class="btn primary" id="save-community">儲存發起人與贊助單位</button><span id="community-status" class="settings-status" role="status"></span></div></form>`;
  $('.admin-workspace').insertBefore(panel,$('#admin-summary'));
@@ -69,14 +69,15 @@ async function renderCampaign(){
  $('#campaign-capacity').textContent=s.capacity;
  const rules=c.rules;
  $('#rule-review-days').textContent=rules.reviewDays;
+ $('#review-days-summary').textContent=rules.reviewDays;
  $('#rule-review-checks').textContent=rules.reviewChecks;
  $('#rule-fairness').textContent=rules.fairness;
  $('#rule-gift-summary').textContent=rules.giftSponsor?`本期提供 ${s.capacity} 本好書，由${rules.giftSponsor}贊助。`:`本期提供 ${s.capacity} 本好書，贊助單位待公告。`;
- $('#gift-sponsor-title').textContent=rules.giftSponsor?rules.giftSponsor+' × '+c.title:'本期贊助單位待公告';
+ $('#gift-sponsor-title').textContent=rules.giftSponsor?rules.giftSponsor:'本期贊助單位待公告';
  $('#gift-sponsor-description').textContent=rules.giftSponsor?`本期 ${s.capacity} 本好書由${rules.giftSponsor}贊助。`:'確認後將在這裡公布。';
  const giftPartner=U.merge(s.community).sponsors.find(x=>x.visible&&x.name===rules.giftSponsor);
  const giftLogo=$('#gift-sponsor-logo'),hasGiftLogo=!!(giftPartner?.logo||giftPartner?.builtin);
- giftLogo.hidden=!hasGiftLogo;$('#gift-sponsor-placeholder').hidden=hasGiftLogo||!rules.giftSponsor;
+ giftLogo.hidden=!hasGiftLogo;$('#gift-sponsor-placeholder').hidden=true;
  if(hasGiftLogo){giftLogo.src=giftPartner.logo?communityImage(giftPartner.logo):giftPartner.builtin;giftLogo.alt=rules.giftSponsor+'標誌';}else giftLogo.removeAttribute('src');
  const remaining=D.remainingBooks(s);
  $('#rules-stock-status').hidden=remaining>0;
