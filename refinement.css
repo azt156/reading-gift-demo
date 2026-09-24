@@ -120,3 +120,19 @@ label:not(.checkbox),input:not([type=checkbox]),textarea,select{font-size:18px}.
 /* Matching capsule buttons for rules-page navigation. */
 .rules-page-actions .btn,.rules-page-heading .rules-back{width:270px;min-width:0;min-height:64px;box-sizing:border-box;justify-content:center;gap:12px;padding:14px 22px;font-family:var(--sans);font-size:19px;font-weight:700;line-height:1.6;text-decoration:none;border-radius:999px}
 @media(max-width:760px){.rules-page-actions .btn{width:100%}.rules-page-heading .rules-back{width:min(270px,100%)}}
+
+/* Text navigation, a compact reading CTA, and vertically aligned footer columns. */
+.brand-first .simple-intro .btn{min-width:0;width:auto;gap:14px;padding-inline:28px;justify-content:center}
+.brand-first .simple-intro .arrow-circle{display:inline-block;flex:none;width:auto;height:auto;padding:0;border:0;border-radius:0;background:transparent;color:inherit;font-size:25px;line-height:1}
+.service-footer .footer-bottom{align-items:center;gap:30px;padding-block:30px}
+.service-footer .footer-brand-block{padding-top:0}.service-footer .sponsor,.service-footer .footer-supporter{font-size:16px;align-items:center;gap:14px;line-height:1.5}
+.service-footer .sponsor img{width:150px;max-width:150px;height:60px}
+.service-footer h2{font-size:18px;line-height:1.5;margin:0 0 6px}.service-footer p{font-size:16px;line-height:1.5;margin:0}
+@media(max-width:760px){.service-footer .footer-bottom{gap:24px;align-items:start}.service-footer .sponsor img{width:140px;max-width:140px;height:56px}}
+
+/* Shared content-card geometry and a workspace aligned with the header shell. */
+:root{--content-radius:28px}
+.panel,.activity-board,.stat,.quota-settings,.founder-origin .founder-card,.rules-document .full-rules{border-radius:var(--content-radius)}
+.simple-workspace .workspace-head,.simple-workspace .workspace-grid{max-width:1180px}
+.simple-workspace .workspace-head{text-align:left}
+@media(max-width:760px){:root{--content-radius:22px}}

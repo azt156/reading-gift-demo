@@ -137,7 +137,7 @@ let activeUrls=[];function mediaUrl(blob){const u=URL.createObjectURL(blob);acti
 window.addEventListener('pagehide',()=>activeUrls.forEach(u=>URL.revokeObjectURL(u)));
 if($('#reading-form')){
  let reader=getReader();if(!reader||reader.authMode!=='email_preview'){location.replace('access.html');return;}
- $('#reader-greeting').textContent=reader.name+'，從一本書開始，把想法慢慢寫清楚。';
+ $('#reader-greeting').textContent='從一本書開始，把想法慢慢寫清楚。';
  let s=await state();let record=s.records.find(r=>r.readerId===reader.id);
  let draft=s.drafts[reader.id]||{bookTitle:'',bookAuthor:'',bookReason:'',readConfirm:false,notes:[{source:'',text:''}],reflection:'',connection:'',audio:null,attachments:[],authenticConfirm:false,step:1};
  if(record&&record.status!=='revision')draft=record.data;
