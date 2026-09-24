@@ -136,3 +136,14 @@ label:not(.checkbox),input:not([type=checkbox]),textarea,select{font-size:18px}.
 .simple-workspace .workspace-head,.simple-workspace .workspace-grid{max-width:1180px}
 .simple-workspace .workspace-head{text-align:left}
 @media(max-width:760px){:root{--content-radius:22px}}
+
+/* Homepage help opens the supplied NotebookLM in a separate tab. */
+.leya-help{position:fixed;right:20px;bottom:calc(52px + env(safe-area-inset-bottom,0px));z-index:35;width:184px;filter:drop-shadow(0 5px 12px #1e3a5215)}
+.leya-help[hidden]{display:none}.leya-help>a{display:flex;flex-direction:column;align-items:center;text-decoration:none;color:var(--ink);border-radius:22px}
+.leya-help img{width:82px;height:96px;object-fit:contain;margin-bottom:-6px;position:relative}
+.leya-help-bubble{display:flex;flex-direction:column;align-items:center;width:100%;padding:10px 8px;background:#fff;border:1px solid var(--line);border-radius:22px;line-height:1.5}
+.leya-help-bubble strong{font-size:16px}.leya-help-bubble>span{font-size:14px;color:var(--blue)}.leya-help-bubble small{font-size:11px;color:var(--muted);margin-top:2px}
+.leya-help>a:hover .leya-help-bubble{border-color:var(--blue);background:#f1f5f7}.leya-help>a:hover strong{color:var(--blue);text-decoration:underline;text-decoration-color:var(--gold);text-decoration-thickness:3px;text-underline-offset:4px}
+.leya-help-close{position:absolute;top:0;right:0;width:32px;height:32px;display:grid;place-items:center;padding:0;border:1px solid var(--line);border-radius:50%;background:white;color:var(--ink);font-size:23px;line-height:1;cursor:pointer;z-index:1}
+.leya-help :is(a,button):focus-visible{outline:3px solid var(--blue);outline-offset:4px}
+@media(max-width:760px){.leya-help{right:12px;bottom:calc(48px + env(safe-area-inset-bottom,0px));width:160px}.leya-help img{width:60px;height:72px}.leya-help-bubble{padding:8px 5px}.leya-help-bubble strong{font-size:15px}.leya-help-close{width:44px;height:44px}}
