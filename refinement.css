@@ -150,3 +150,6 @@ label:not(.checkbox),input:not([type=checkbox]),textarea,select{font-size:18px}.
 
 /* Supplied journey illustrations already include their task symbols. */
 .review-art img{width:100%;object-fit:contain}.review-art:not(.image-unavailable) .review-symbol{display:none}
+
+/* The dedicated rules page always shows its full content. */
+.rules-document .full-rules>.terms-grid{padding-top:24px}
