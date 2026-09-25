@@ -147,3 +147,6 @@ label:not(.checkbox),input:not([type=checkbox]),textarea,select{font-size:18px}.
 .leya-help-close{position:absolute;top:0;right:0;width:32px;height:32px;display:grid;place-items:center;padding:0;border:1px solid var(--line);border-radius:50%;background:white;color:var(--ink);font-size:23px;line-height:1;cursor:pointer;z-index:1}
 .leya-help :is(a,button):focus-visible{outline:3px solid var(--blue);outline-offset:4px}
 @media(max-width:760px){.leya-help{right:12px;bottom:calc(48px + env(safe-area-inset-bottom,0px));width:160px}.leya-help img{width:60px;height:72px}.leya-help-bubble{padding:8px 5px}.leya-help-bubble strong{font-size:15px}.leya-help-close{width:44px;height:44px}}
+
+/* Supplied journey illustrations already include their task symbols. */
+.review-art img{width:100%;object-fit:contain}.review-art:not(.image-unavailable) .review-symbol{display:none}
